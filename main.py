@@ -78,7 +78,7 @@ class Distribute_Command(QMainWindow):
         input_path = self.cw.input_path_lineedit.text().strip()
         delimiter = self.cw.delimiter_lineedit.text().strip()
         token_size= self.cw.token_size_spinbox.value()
-        command = self.cw.command_input_list.toPlainText()
+        command = re.sub('\n', '', self.cw.command_input_list.toPlainText())
         if not os.path.isdir(distribute_path) or not os.path.isdir(input_path):
             return
         else:
