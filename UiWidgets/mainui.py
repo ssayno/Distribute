@@ -3,7 +3,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTextEdit, QVBoxLayout, QWidget
 from .titlebar import Titlebar
-from settings import DELIMITER, TOKEN_SIZE
+from settings import DELIMITER, TOKEN_SIZE, COMMAND, INPUT_PATH, DISTRIBUTE_PATH
 
 
 class UIWidget(QWidget):
@@ -12,22 +12,25 @@ class UIWidget(QWidget):
         self._layout = QVBoxLayout()
         self.title_bar = Titlebar(self)
         self._layout.addWidget(self.title_bar)
-        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setContentsMargins(0, 2, 0, 2)
         self.setLayout(self._layout)
         self.setUI()
 
     def setUI(self):
         ## arguments layout
         arguments_layout = QHBoxLayout()
+        arguments_layout.setSpacing(0)
         # comamnd input
         command_layout = QVBoxLayout()
         command_layout.setSpacing(0)
         self.command_input_label = QLabel("指令输入")
         self.command_input_label.setAlignment(Qt.AlignCenter)
         self.command_input_list = QTextEdit()
+        if COMMAND is not None:
+            self.command_input_list.append(COMMAND)
         command_layout.addWidget(self.command_input_label)
         command_layout.addWidget(self.command_input_list)
-        arguments_layout.addLayout(command_layout, stretch= 3)
+        arguments_layout.addLayout(command_layout, stretch=5)
         # delimiter select
         td_layout = QVBoxLayout()
         td_layout.setSpacing(0)
@@ -48,7 +51,7 @@ class UIWidget(QWidget):
         self.token_size_spinbox.setMinimum(5)
         self.token_size_spinbox.setMaximum(100)
         # set default value
-        self.token_size_spinbox.setValue(TOKEN_SIZE)
+        self.token_size_spinbox.setValue(int(TOKEN_SIZE))
         td_layout.addWidget(self.token_size_label)
         td_layout.addWidget(self.token_size_spinbox)
         self._layout.addLayout(arguments_layout)
@@ -56,6 +59,8 @@ class UIWidget(QWidget):
         distribute_layout = QVBoxLayout()
         self.dfoldpath_button = QPushButton("Distribute fold path select")
         self.dfoldpath_lineedit = QLineEdit()
+        if DISTRIBUTE_PATH is not None:
+            self.dfoldpath_lineedit.setText(DISTRIBUTE_PATH)
         distribute_layout.addWidget(self.dfoldpath_button)
         distribute_layout.addWidget(self.dfoldpath_lineedit)
         self._layout.addLayout(distribute_layout)
@@ -63,10 +68,12 @@ class UIWidget(QWidget):
         input_layout = QVBoxLayout()
         self.input_path_button = QPushButton("Split token path select")
         self.input_path_lineedit = QLineEdit()
+        if INPUT_PATH is not None:
+            self.input_path_lineedit.setText(INPUT_PATH)
         input_layout.addWidget(self.input_path_button)
         input_layout.addWidget(self.input_path_lineedit)
         self._layout.addLayout(input_layout)
-        # startu button
+        # start button
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(0)
