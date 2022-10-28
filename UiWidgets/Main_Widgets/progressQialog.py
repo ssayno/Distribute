@@ -149,7 +149,6 @@ class Process_dialog(QDialog):
                     os.mkdir(company_done_path)
                 shutil.move(json_file, company_done_path)
                 self.update_tree_signal.emit(origin_name, "DONE", company_name, True)
-                print('done')
             elif NAME_DELIMITER in json_file_name:
                 origin_name = f"{json_file_name.split(NAME_DELIMITER)[0]}.json"
                 self.update_tree_signal.emit(origin_name, "Running", company_name, True)

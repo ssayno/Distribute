@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import os
-from PyQt5.QtCore import QPoint, QRectF, QThread, QTimer, Qt
-from PyQt5.QtGui import QCloseEvent, QPainterPath, QRegion
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QWidget
+from PyQt5.QtCore import QPoint, QThread, QTimer, Qt
+from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QWidget
 import qdarkstyle
 import fileinput
 import re
@@ -77,7 +77,6 @@ class Distribute_Command(QMainWindow):
             self.dialog.hide()
 
     def add_dialog_show_info(self):
-        self.show_dialog()
         distribute_path = self.cw.dfoldpath_lineedit.text().strip()
         input_path = self.cw.input_path_lineedit.text().strip()
         delimiter = self.cw.delimiter_lineedit.text().strip()
@@ -85,8 +84,10 @@ class Distribute_Command(QMainWindow):
         command = re.sub('\n', '', self.cw.command_input_list.toPlainText())
         if not os.path.isdir(distribute_path) or not os.path.isdir(input_path):
             # dir path not correct
+            QMessageBox.warning(self, "Warning", "Path is invalid, please input correct path to continue.")
             return
         else:
+            self.show_dialog()
             self.cw.start_button.setEnabled(False)
             split_token_thread = Split_Token(
                 distribute_path=distribute_path, input_path=input_path, command=command, dialong_update_signal=self.dialog.update_tree_signal,
@@ -136,14 +137,14 @@ class Distribute_Command(QMainWindow):
             "TOKEN_SIZE": self.cw.token_size_spinbox.value(),
             "DELIMITER": self.cw.delimiter_lineedit.text().strip()
         }
-        with fileinput.input("settings.py", inplace=True) as f:
+        with fileinput.input("settings.py", inplace=True, encoding='U8') as f:
             for row in f:
                 key = row.split('=')[0].strip()
                 if key in target_dict.keys():
                     if key == "TOKEN_SIZE":
                         print(f"{key} = {target_dict.get(key)}")
                     else:
-                        print(f"{key} = '''{target_dict.get(key)}'''")
+                        print(f"{key} = r'''{target_dict.get(key)}'''")
                 else:
                     print(row, end='')
         return super().closeEvent(a0)
