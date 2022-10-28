@@ -4,7 +4,7 @@ import os
 import json
 from PyQt5.QtCore import QPoint, QRectF, QThread, QTimer, Qt, pyqtSignal
 from PyQt5.QtGui import QCloseEvent, QCursor, QPainterPath, QRegion
-from PyQt5.QtWidgets import QDialog, QLabel, QMainWindow, QApplication, QFileDialog, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QLabel, QMainWindow, QApplication, QFileDialog, QVBoxLayout, QWidget
 from UiWidgets.mainui import UIWidget
 from settings import DELIMITER, TOKEN_SIZE, TIMER_GAP
 from Utils.config import Config
@@ -16,8 +16,7 @@ import re
 class Distribute_Command(QMainWindow):
     def __init__(self) -> None:
         super(Distribute_Command, self).__init__()
-        self.resize(600, 350)
-        self.setMaximumSize(800, 400)
+        self.setFixedSize(600, 350)
         path = QPainterPath()
         path.addRoundedRect(QRectF(self.rect()), 10, 10)
         mask = QRegion(path.toFillPolygon().toPolygon())
@@ -88,6 +87,7 @@ class Distribute_Command(QMainWindow):
         token_size = self.cw.token_size_spinbox.value()
         command = re.sub('\n', '', self.cw.command_input_list.toPlainText())
         if not os.path.isdir(distribute_path) or not os.path.isdir(input_path):
+            # dir path not correct
             return
         else:
             self.cw.start_button.setEnabled(False)
@@ -96,8 +96,11 @@ class Distribute_Command(QMainWindow):
                 delimiter=delimiter, parent=self
             )
             split_token_thread.start()
+            # tim = QTimer(self)
+            # tim.timeout.connect(lambda: print(split_token_thread.isFinished()))
+            # tim.start(1000)
             split_token_thread.finished.connect(
-                lambda: self.dialog.timer.start(TIMER_GAP)
+                lambda: self.dialog._timer.start(TIMER_GAP)
             )
 
     def mousePressEvent(self, event):
@@ -154,7 +157,7 @@ class Process_dialog(QDialog):
     def __init__(self, parent=None):
         super(Process_dialog, self).__init__(parent=parent)
         # self.setStyleSheet("QDialog{background-color: red;}")
-        self.setStyleSheet('QDialog{border-radius: 100px;border: none;}')
+        # self.setStyleSheet('QDialog{border: solid 2px white; border-radius: 20px}')
         # set QDialog size
         self.w_width = 400
         self.w_height = 600
@@ -168,8 +171,8 @@ class Process_dialog(QDialog):
         self.follow_signal.connect(self._setPosition)
         self.addUIWidget()
         # timer
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_timer_func)
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self.update_timer_func)
 
     def addUIWidget(self):
         banner = QLabel("动态显示")
@@ -197,15 +200,36 @@ class Process_dialog(QDialog):
         self.follow_signal.emit()
         return super().show()
 
+class Test(QWidget):
+    def __init__(self):
+        super(Test, self).__init__()
+        tim = QTimer(self)
+        # single_ = QTestThread(self, "", "", "")
+        single_ = Split_Token("", "", "")
+        single_.start()
+        tim.timeout.connect(lambda: print(single_.isFinished()))
+        tim.start(2000)
+
+class QTestThread(QThread):
+    def __init__(self, distribute_path, input_path, command, token_size=TOKEN_SIZE, delimiter=DELIMITER, parent=None):
+        super(QTestThread, self).__init__()
+        self.dp = distribute_path
+        self._ip = input_path
+        self.tk_size = token_size
+        self.delimiter = delimiter
+        self.command = command
+
+    def run(self):
+        print('a')
 
 class Split_Token(QThread):
     def __init__(self, distribute_path, input_path, command, token_size=TOKEN_SIZE, delimiter=DELIMITER, parent=None):
+        super(Split_Token, self).__init__(parent=parent)
         self.dp = distribute_path
         self.ip = input_path
         self.tk_size = token_size
         self.delimiter = delimiter
         self.command = command
-        super(Split_Token, self).__init__(parent=parent)
 
     def run(self) -> None:
         try:
@@ -232,12 +256,12 @@ class Split_Token(QThread):
             print(e)
         finally:
             print('finished')
-            print(self.isFinished())
-        return super().run()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    #t = Test()
+    #t.show()
     dc = Distribute_Command()
     dc.show()
     sys.exit(app.exec_())
