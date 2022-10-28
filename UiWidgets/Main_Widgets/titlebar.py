@@ -3,7 +3,7 @@ import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHBoxLayout, QSizePolicy, QWidget
-from Sub_Widget.titlebar_button import TitlebarButton
+from UiWidgets.Sub_Widgets.titlebar_button import TitlebarButton
 from settings import STATIC
 
 
