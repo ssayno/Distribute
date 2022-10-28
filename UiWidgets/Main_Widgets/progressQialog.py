@@ -12,6 +12,7 @@ from settings import NAME_DELIMITER
 class Process_dialog(QDialog):
     follow_signal = pyqtSignal()
     update_tree_signal = pyqtSignal(str, str, str, bool)
+    update_count_siganl = pyqtSignal()
 
     def __init__(self, parent=None):
         super(Process_dialog, self).__init__(parent=parent)
@@ -20,12 +21,14 @@ class Process_dialog(QDialog):
         # set QDialog size
         self.w_width = 400
         self.w_height = 600
-        self.radius = 20
+        self.radius = 10
         self.resize(self.w_width, self.w_height)
         path = QPainterPath()
-        path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius)
-        mask = QRegion(path.toFillPolygon().toPolygon())
-        self.setMask(mask)
+        path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius, Qt.AbsoluteSize)
+        # mask = QRegion(path.toFillPolygon().toPolygon())
+        for polygon in path.toFillPolygons():
+            mask = QRegion(polygon.toPolygon())
+            self.setMask(mask)
         #
         self.q_layout = QVBoxLayout()
         self.q_layout.setAlignment(Qt.AlignTop)
@@ -33,7 +36,6 @@ class Process_dialog(QDialog):
         #
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
         self.follow_signal.connect(self._setPosition)
-        self.addUIWidget()
         # timer
         self._timer = QTimer(self)
         # connect signal with slot func
@@ -41,14 +43,22 @@ class Process_dialog(QDialog):
         # need a map represent the parent item
         self.map_name_item = {}
         self.listened_path = None
+        # count
+        self.success_count = 0
+        self.fail_count = 0
+        self.addUIWidget()
 
     def addUIWidget(self):
-        banner = QLabel("动态显示")
-        banner.setAlignment(Qt.AlignCenter)
-        self.q_layout.addWidget(banner)
         self.timeLabel = QLabel("Not Start")
         self.timeLabel.setAlignment(Qt.AlignCenter)
+        self.timeLabel.setStyleSheet('QLabel{font: 16px;}')
         self.q_layout.addWidget(self.timeLabel)
+        # count label
+        self.count_label = QLabel()
+        self.count_label.setAlignment(Qt.AlignCenter)
+        self.count_label.setStyleSheet('QLabel{font: 16px;}')
+        self.count_label.setText(f"成功 {self.success_count}, 失败 {self.fail_count}")
+        self.q_layout.addWidget(self.count_label)
         # tree show
         self.dir_tree = QTreeWidget(self)
         # basic configuration for tree dir
@@ -80,7 +90,6 @@ class Process_dialog(QDialog):
         if self.dir_tree.itemsExpandable():
             self.dir_tree.expandItem(first_item)
 
-
     def show(self) -> None:
         self.follow_signal.emit()
         return super().show()
@@ -89,6 +98,7 @@ class Process_dialog(QDialog):
         print('connect slot func')
         self.update_tree_signal.connect(self.update_tree_widget)
         self._timer.timeout.connect(self.listen_dir)
+        self.update_count_siganl.connect(self.update_label_slot_func)
 
     def update_tree_widget(self, name, status, company_name, modify):
         if modify:
@@ -97,8 +107,10 @@ class Process_dialog(QDialog):
                 print("没有这个节点")
                 return
             old_status = need_modify_item.text(1)
-            print(old_status)
             if old_status != status:
+                if status == "DONE":
+                    self.success_count += 1
+                    self.update_count_siganl.emit()
                 need_modify_item.setText(1, status)
         else:
             if company_name not in self.map_name_item:
@@ -141,3 +153,6 @@ class Process_dialog(QDialog):
             elif NAME_DELIMITER in json_file_name:
                 origin_name = f"{json_file_name.split(NAME_DELIMITER)[0]}.json"
                 self.update_tree_signal.emit(origin_name, "Running", company_name, True)
+
+    def update_label_slot_func(self):
+        self.count_label.setText(f"成功 {self.success_count}, 失败 {self.fail_count}")

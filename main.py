@@ -17,10 +17,6 @@ class Distribute_Command(QMainWindow):
     def __init__(self) -> None:
         super(Distribute_Command, self).__init__()
         self.setFixedSize(800, 350)
-        path = QPainterPath()
-        path.addRoundedRect(QRectF(self.rect()), 10, 10)
-        mask = QRegion(path.toFillPolygon().toPolygon())
-        self.setMask(mask)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.cw = UIWidget(self)
         self.cw.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())

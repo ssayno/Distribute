@@ -12,7 +12,7 @@ class UIWidget(QWidget):
         self._layout = QVBoxLayout()
         self.title_bar = Titlebar(self)
         self._layout.addWidget(self.title_bar)
-        self._layout.setContentsMargins(0, 2, 0, 2)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self._layout)
         self.setUI()
 
