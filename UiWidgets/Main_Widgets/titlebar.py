@@ -2,7 +2,7 @@
 import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QHBoxLayout, QSizePolicy, QWidget
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QSizePolicy, QWidget, QPushButton
 from UiWidgets.Sub_Widgets.titlebar_button import TitlebarButton
 from settings import STATIC
 
@@ -20,10 +20,10 @@ class Titlebar(QWidget):
         # add static path
         self.icon_path = os.path.join(STATIC, 'Icons')
         #
-        self.setFixedHeight(20)
+        self.setFixedHeight(30)
         # add title bar button and connect their signal with function
         self.add_title_bar_button()
-        self.setStyleSheet("QWidget{background-color: white;}")
+        self.setStyleSheet("QWidget{background-color: green; color: black;}")
 
     def add_title_bar_button(self):
         self.minimum_button = TitlebarButton(self)
@@ -33,6 +33,6 @@ class Titlebar(QWidget):
         self.close_button = TitlebarButton(self)
         self.close_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-close-16.png')))
         # add button
-        self.title_layout.addWidget(self.minimum_button, Qt.AlignRight)
-        self.title_layout.addWidget(self.maximum_button, Qt.AlignRight)
-        self.title_layout.addWidget(self.close_button, Qt.AlignRight)
+        self.title_layout.addWidget(self.minimum_button, stretch=1)
+        self.title_layout.addWidget(self.maximum_button, stretch=1)
+        self.title_layout.addWidget(self.close_button, stretch=1)

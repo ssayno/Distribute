@@ -4,6 +4,7 @@ from settings import TOKEN_SIZE
 class Config:
     def __init__(self, company_path, command, token_size=TOKEN_SIZE):
         self.company_name = os.path.basename(company_path)
+        print(self.company_name)
         self.distination = f'{company_path}-translated'
         self.command =command
         self.token_size = token_size

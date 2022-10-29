@@ -7,7 +7,7 @@ class TitlebarButton(QPushButton):
     def __init__(self, parent=None):
         super(TitlebarButton, self).__init__(parent=parent)
         self.setFixedHeight(self.parent().height())
-        self.setFixedWidth(20)
+        self.setFixedWidth(40)
         self.setStyleSheet(
             '''
             QPushButton{

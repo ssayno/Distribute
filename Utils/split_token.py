@@ -37,8 +37,6 @@ class Split_Token(QThread):
                     image_dst_distributed = content['distination']
                     passed_command = f'{command} --file-list "{file_list_argument}" --image-dst-distributed "{image_dst_distributed}"'
                     json.dump({'command': passed_command}, f, indent='\t', ensure_ascii=False)
-                temp_list = single_config_path.split(os.sep)
-                self.dus.emit(temp_list[-1], 'Pending', temp_list[-2], False)
         except Exception as e:
             print(e)
         finally:

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import os
-from PyQt5.QtCore import QPoint, QThread, QTimer, Qt
+from PyQt5.QtCore import QMetaEnum, QPoint, QThread, QTimer, Qt
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QWidget
-import qdarkstyle
 import fileinput
 import re
 from UiWidgets.Main_Widgets.mainui import UIWidget
@@ -13,13 +12,24 @@ from Utils.split_token import Split_Token
 from settings import DELIMITER, TOKEN_SIZE, TIMER_GAP
 
 
+basic_style = '''  \
+QWidget{
+font: 20px;
+}
+QLabel{
+font: 20px;
+}
+QTextEdit{
+font: 20px;
+}
+'''
 class Distribute_Command(QMainWindow):
     def __init__(self) -> None:
         super(Distribute_Command, self).__init__()
-        self.setFixedSize(800, 350)
+        self.setFixedSize(800, 500)
         self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setStyleSheet(basic_style)
         self.cw = UIWidget(self)
-        self.cw.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
         self.setCentralWidget(self.cw)
         # connect button with their function
         self.connect_button_with_func()
@@ -77,18 +87,17 @@ class Distribute_Command(QMainWindow):
             self.dialog.hide()
 
     def add_dialog_show_info(self):
-        distribute_path = self.cw.dfoldpath_lineedit.text().strip()
-        input_path = self.cw.input_path_lineedit.text().strip()
+        distribute_path = os.path.normpath(self.cw.dfoldpath_lineedit.text().strip())
+        input_path = os.path.normpath(self.cw.input_path_lineedit.text().strip())
         delimiter = self.cw.delimiter_lineedit.text().strip()
         token_size = self.cw.token_size_spinbox.value()
-        command = re.sub('\n', '', self.cw.command_input_list.toPlainText())
+        command = re.sub(r'\s+', '', self.cw.command_input_list.toPlainText())
         if not os.path.isdir(distribute_path) or not os.path.isdir(input_path):
             # dir path not correct
             QMessageBox.warning(self, "Warning", "Path is invalid, please input correct path to continue.")
             return
         else:
             self.show_dialog()
-            self.cw.start_button.setEnabled(False)
             split_token_thread = Split_Token(
                 distribute_path=distribute_path, input_path=input_path, command=command, dialong_update_signal=self.dialog.update_tree_signal,
                 token_size=token_size, delimiter=delimiter, parent=self
@@ -99,8 +108,10 @@ class Distribute_Command(QMainWindow):
             )
 
     def connect_and_start_dialog_timer(self, d_path):
-        self.dialog.listened_path = d_path
-        self.dialog._timer.start(TIMER_GAP)
+        if d_path != self.dialog.listened_path:
+            self.dialog.listened_path = d_path
+        else:
+            QMessageBox.warning(self, 'Warning', '不要设置同一个目录跑两次')
 
     def mousePressEvent(self, event):
         self.oldPos = event.globalPos()
@@ -112,7 +123,6 @@ class Distribute_Command(QMainWindow):
         else:
             delta = QPoint(event.globalPos() - self.oldPos)
             self.move(self.x() + delta.x(), self.y() + delta.y())
-            self.dialog.follow_signal.emit()
             self.oldPos = event.globalPos()
         return super().mouseMoveEvent(event)
 

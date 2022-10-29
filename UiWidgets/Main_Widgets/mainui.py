@@ -10,9 +10,10 @@ class UIWidget(QWidget):
     def __init__(self, parent=None):
         super(UIWidget, self).__init__(parent=parent)
         self._layout = QVBoxLayout()
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
         self.title_bar = Titlebar(self)
         self._layout.addWidget(self.title_bar)
-        self._layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self._layout)
         self.setUI()
 
