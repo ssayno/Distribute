@@ -6,6 +6,14 @@ from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QSizePolicy, QWidget
 from UiWidgets.Sub_Widgets.titlebar_button import TitlebarButton
 from settings import STATIC
 
+title_bar_style = '''\
+QLabel{
+font: 24px;
+qproperty-alignment: AlignCenter;
+padding-bottom: 10px;
+color: black;
+}
+'''
 
 class Titlebar(QWidget):
     def __init__(self, parent=None):
@@ -20,19 +28,21 @@ class Titlebar(QWidget):
         # add static path
         self.icon_path = os.path.join(STATIC, 'Icons')
         #
-        self.setFixedHeight(30)
+        self.setFixedHeight(45)
         # add title bar button and connect their signal with function
         self.add_title_bar_button()
-        self.setStyleSheet("QWidget{background-color: green; color: black;}")
+        self.setStyleSheet(title_bar_style)
 
     def add_title_bar_button(self):
+        self.info_label = QLabel("Complex Command")
         self.minimum_button = TitlebarButton(self)
         self.minimum_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-minimize-window-16.png')))
         self.maximum_button = TitlebarButton(self)
         self.maximum_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-maximize-window-16.png')))
         self.close_button = TitlebarButton(self)
-        self.close_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-close-16.png')))
+        self.close_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-close-50.png')))
         # add button
+        self.title_layout.addWidget(self.info_label)
         self.title_layout.addWidget(self.minimum_button, stretch=1)
         self.title_layout.addWidget(self.maximum_button, stretch=1)
         self.title_layout.addWidget(self.close_button, stretch=1)

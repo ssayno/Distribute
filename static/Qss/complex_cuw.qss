@@ -1,0 +1,49 @@
+QWidget{
+font: 20px;
+}
+QLabel{
+font: 30px;
+background-color: grey;
+color: black;
+qproperty-alignment: AlignCenter;
+}
+QTextEdit{
+border-radius: 8px;
+font-style: oblique;
+font: 22px;
+background-color: #EEDEE8;
+color: red;
+}
+QPushButton{
+border: 1px solid black;
+padding: 10px 0;
+font: 20px;
+color: black;
+}
+QPushButton:hover{
+font: 20px;
+font-style: italic;
+color: green;
+}
+QPushButton:pressed{
+font-style: bold;
+background-color: #74F3F1;
+color: black;
+opacity: 0.8;
+}
+QLineEdit{
+border-bottom: 5px solid black;
+padding: 5px 12px;
+background-color: pink;
+color: black;
+}
+QLineEdit:focus{
+background-color: gold;
+}
+QLineEdit#delimiter{
+qproperty-alignment: AlignCenter;
+}
+QSpinBox{
+background-color: #ECB282;
+color: white;
+}

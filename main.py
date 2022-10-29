@@ -1,69 +1,95 @@
 #!/usr/bin/env python3
 import sys
 import os
-from PyQt5.QtCore import QMetaEnum, QPoint, QThread, QTimer, Qt
+from PyQt5.QtCore import QPoint, QThread, QTimer, Qt
 from PyQt5.QtGui import QCloseEvent
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QWidget
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QStackedWidget, QVBoxLayout, QWidget
 import fileinput
 import re
-from UiWidgets.Main_Widgets.mainui import UIWidget
+from UiWidgets.Main_Widgets.complex_cuw import ComplexUIWidget
+from UiWidgets.Main_Widgets.single_cuw import SingleUIWidget
 from UiWidgets.Main_Widgets.progressQialog import Process_dialog
+from UiWidgets.Main_Widgets.titlebar import Titlebar
 from Utils.split_token import Split_Token
-from settings import DELIMITER, TOKEN_SIZE, TIMER_GAP
+from settings import DELIMITER, TOKEN_SIZE
 
 
-basic_style = '''  \
-QWidget{
-font: 20px;
-}
-QLabel{
-font: 20px;
-}
-QTextEdit{
-font: 20px;
+basic_style = '''\
+QMainWindow{
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 #1BDAF9,
+                stop: 0.5 #5FEEB8,
+                stop:1 #1BDAF9);
+font-family: "Times New Roman", Times, serif;
+font: 24px;
 }
 '''
 class Distribute_Command(QMainWindow):
     def __init__(self) -> None:
         super(Distribute_Command, self).__init__()
-        self.setFixedSize(800, 500)
+        self.setFixedSize(800, 600)
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setStyleSheet(basic_style)
-        self.cw = UIWidget(self)
+        # set centeral widget
+        self.cw = QWidget()
+        self.cw_layout = QVBoxLayout()
+        self.cw_layout.setSpacing(0)
         self.setCentralWidget(self.cw)
+        self.cw.setLayout(self.cw_layout)
+        # set basic style
+        self.setStyleSheet(basic_style)
+        self._stack = QStackedWidget()
+        # add widget
+        self.complex_command_uw = ComplexUIWidget(self)
+        self.single_command_uw = SingleUIWidget(self)
+        self._stack.addWidget(self.complex_command_uw)
+        self._stack.addWidget(self.single_command_uw)
+        # add widget
+        self.title_bar = Titlebar(self)
+        self.cw_layout.addWidget(self.title_bar)
+        self.cw_layout.addWidget(self._stack)
+        #self.setCentralWidget(self.complex_command_uw)
         # connect button with their function
         self.connect_button_with_func()
         # process show dialog
         self.dialog = Process_dialog(self)
 
     def connect_button_with_func(self):
-        self.cw.dfoldpath_button.clicked.connect(
+        self.complex_command_uw.dfoldpath_button.clicked.connect(
             lambda checked, x=0: self.ask_directory(x)
         )
-        self.cw.input_path_button.clicked.connect(
+        self.complex_command_uw.input_path_button.clicked.connect(
             lambda checked, x=1: self.ask_directory(x)
         )
-        self.cw.start_button.clicked.connect(
+        self.complex_command_uw.start_button.clicked.connect(
             self.add_dialog_show_info
         )
         # title bar button
-        self.cw.title_bar.close_button.clicked.connect(
+        self.title_bar.close_button.clicked.connect(
             self.quit_this_app
 
         )
-        self.cw.title_bar.minimum_button.clicked.connect(
+        self.title_bar.minimum_button.clicked.connect(
             self.titlebar_minimize_app
         )
-        self.cw.title_bar.maximum_button.clicked.connect(
+        self.title_bar.maximum_button.clicked.connect(
             self.titlebar_maximize_app
         )
         #
-        self.cw.show_dialog_button.clicked.connect(
+        self.complex_command_uw.show_dialog_button.clicked.connect(
             self.show_dialog
         )
-        self.cw.hide_dialog_button.clicked.connect(
+        self.complex_command_uw.hide_dialog_button.clicked.connect(
             self.hide_dialog
         )
+        # Sat Oct 29 20:08:08 2022
+        self.complex_command_uw.check_to_single_command_ui.clicked.connect(
+            lambda: self._stack.setCurrentWidget(self.single_command_uw)
+        )
+        self.single_command_uw.check_to_complex_command_ui.clicked.connect(
+            lambda: self._stack.setCurrentWidget(self.complex_command_uw)
+        )
+        #
+        self._stack.currentChanged.connect(self.titlebar_info_show)
 
     def ask_directory(self, cate_number: int):
         gets_ = QFileDialog().getExistingDirectory(self, caption='Get Directory',
@@ -72,26 +98,28 @@ class Distribute_Command(QMainWindow):
             return
         _directory = gets_
         if cate_number == 0:
-            self.cw.dfoldpath_lineedit.setText(_directory)
+            self.complex_command_uw.dfoldpath_lineedit.setText(_directory)
         elif cate_number == 1:
-            self.cw.input_path_lineedit.setText(_directory)
+            self.complex_command_uw.input_path_lineedit.setText(_directory)
         else:
             print("What are you doing")
 
     def show_dialog(self):
-        if not self.dialog.isVisible():
-            self.dialog.show()
+        if not self.dialog.show_dialog():
+            if not self.dialog.isVisible():
+                self.dialog.show()
 
     def hide_dialog(self):
-        if self.dialog.isVisible():
-            self.dialog.hide()
+        if not self.dialog.hide_dialog():
+            if self.dialog.isVisible():
+                self.dialog.hide()
 
     def add_dialog_show_info(self):
-        distribute_path = os.path.normpath(self.cw.dfoldpath_lineedit.text().strip())
-        input_path = os.path.normpath(self.cw.input_path_lineedit.text().strip())
-        delimiter = self.cw.delimiter_lineedit.text().strip()
-        token_size = self.cw.token_size_spinbox.value()
-        command = re.sub(r'\s+', '', self.cw.command_input_list.toPlainText())
+        distribute_path = os.path.normpath(self.complex_command_uw.dfoldpath_lineedit.text().strip())
+        input_path = os.path.normpath(self.complex_command_uw.input_path_lineedit.text().strip())
+        delimiter = self.complex_command_uw.delimiter_lineedit.text().strip()
+        token_size = self.complex_command_uw.token_size_spinbox.value()
+        command = re.sub(r'\s+', ' ', self.complex_command_uw.command_input_list.toPlainText())
         if not os.path.isdir(distribute_path) or not os.path.isdir(input_path):
             # dir path not correct
             QMessageBox.warning(self, "Warning", "Path is invalid, please input correct path to continue.")
@@ -99,7 +127,7 @@ class Distribute_Command(QMainWindow):
         else:
             self.show_dialog()
             split_token_thread = Split_Token(
-                distribute_path=distribute_path, input_path=input_path, command=command, dialong_update_signal=self.dialog.update_tree_signal,
+                distribute_path=distribute_path, input_path=input_path, command=command,
                 token_size=token_size, delimiter=delimiter, parent=self
             )
             split_token_thread.start()
@@ -135,17 +163,24 @@ class Distribute_Command(QMainWindow):
         else:
             self.showMaximized()
 
+    def titlebar_info_show(self):
+        current_widget = self._stack.currentWidget()
+        if current_widget == self.complex_command_uw:
+            self.title_bar.info_label.setText("Complex Command")
+        elif current_widget == self.single_command_uw:
+            self.title_bar.info_label.setText("Single Command")
+
     def quit_this_app(self):
         self.close()
         app.instance().quit()
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         target_dict = {
-            "DISTRIBUTE_PATH": self.cw.dfoldpath_lineedit.text().strip(),
-            "COMMAND": re.sub('\n', '', self.cw.command_input_list.toPlainText()),
-            "INPUT_PATH": self.cw.input_path_lineedit.text().strip(),
-            "TOKEN_SIZE": self.cw.token_size_spinbox.value(),
-            "DELIMITER": self.cw.delimiter_lineedit.text().strip()
+            "DISTRIBUTE_PATH": self.complex_command_uw.dfoldpath_lineedit.text().strip(),
+            "COMMAND": re.sub('\n', '', self.complex_command_uw.command_input_list.toPlainText()),
+            "INPUT_PATH": self.complex_command_uw.input_path_lineedit.text().strip(),
+            "TOKEN_SIZE": self.complex_command_uw.token_size_spinbox.value(),
+            "DELIMITER": self.complex_command_uw.delimiter_lineedit.text().strip()
         }
         with fileinput.input("settings.py", inplace=True, encoding='U8') as f:
             for row in f:

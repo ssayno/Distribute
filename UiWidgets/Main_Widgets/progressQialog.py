@@ -7,56 +7,11 @@ import glob
 import shutil
 import os
 import re
-from settings import NAME_DELIMITER, TIMER_GAP
+from settings import NAME_DELIMITER, TIMER_GAP, STATIC
 
-
-qdialog_style = '''\
-/* basic for all */
-QTreeWidget QHeaderView:section{
-font-size: 20px;
-background-color: #2CE4EC;
-color: black;
-}
-QDialog{
-background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 #30ECCA,
-                stop:1 rgba(0, 200, 230, 0.8));
-font: 20px;
-}
-QTreeWidget{
-background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 #51FFCA,
-                stop:1 #F9F4E2);
-font: 20px;
-color: black;
-}
-QTreeWidget::branch{
-color: black;
-}
-QLabel{
-font-size: 20px;
-qproperty-alignment: AlignCenter;
-color: black;
-}
-/* extra qss */
-QLabel#count-label{
-margin: 5px 40px;
-padding: 1px;
-font-size: 24px;
-border-radius: 6px;
-background-color: pink;
-color: black;
-border: 1px solid #C3B9BC;
-qproperty-alignment: AlignCenter;
-}
-QLabel#time-label{
-font-size: 30px;
-color: white;
-border: 2px solid transparent;
-margin-top: 10px;
-margin-bottom: 20px;
-}
-'''
+qss_style_file = os.path.join(STATIC, 'Qss', 'qdialog.qss')
+with open(qss_style_file, 'r', encoding='U8') as f:
+    qdialog_style = f.read()
 class Process_dialog(QDialog):
     update_tree_signal = pyqtSignal(str, str, str, bool)
     update_count_siganl = pyqtSignal()
@@ -65,6 +20,9 @@ class Process_dialog(QDialog):
         super(Process_dialog, self).__init__(parent=parent)
         # set position
         self.desktop = QDesktopWidget()
+        #
+        self.limit_width = 2
+        self.hide_width = self.desktop.width() - self.limit_width
         self.setStyleSheet(qdialog_style)
         self._setPosition()
         # create animation
@@ -193,7 +151,7 @@ class Process_dialog(QDialog):
                 self.map_name_item[company_name]['JSON-FILES'][name] = name_item_widget
 
     def listen_dir(self):
-        # update time
+        # update time, time gap: 1s
         self.update_time_func()
         self.all_count = 0
         if self.listened_path is None or not os.path.isdir(self.listened_path):
@@ -224,7 +182,6 @@ class Process_dialog(QDialog):
                 else:
                     self.update_tree_signal.emit(origin_name, "DONE", company_name, False)
             elif NAME_DELIMITER in json_file_name:
-                print(json_file_name)
                 origin_name = f"{json_file_name.split(NAME_DELIMITER)[0]}.json"
                 print(origin_name)
                 if origin_name in self.map_name_item[company_name].get('JSON-FILES', []):
@@ -256,28 +213,41 @@ class Process_dialog(QDialog):
         return super().mouseMoveEvent(event)
 
     def leaveEvent(self, a0: QEvent) -> None:
-        if self.x() >= (self.desktop.width() - self.width()):
-            self.show_animation.start()
-            return super().enterEvent(a0)
+        self.hide_dialog()
+        return super().enterEvent(a0)
 
     def enterEvent(self, a0: QEvent) -> None:
-        if self.x() == self.desktop.width() - 2:
-            self.hide_animation.start()
+        self.show_dialog()
         return super().leaveEvent(a0)
+
+    def show_dialog(self) -> bool:
+        if self.x() == self.hide_width:
+            self.show_animation.start()
+            return True
+        return False
+
+    def hide_dialog(self) -> bool:
+        if self.isVisible():
+            if self.x() >= (self.desktop.width() - self.width()):
+                if self.x() != self.hide_width:
+                    self.hide_animation.start()
+                return True
+            return False
+        return True
 
     def create_animation(self):
         # show animation
-        self.show_animation = QPropertyAnimation(self, b'pos', self)
-        self.show_animation.setStartValue(QPoint(self.x(), self.y()))
-        # 自己实现退出，最小化操作，就设置为0，不然干不掉了
-        self.show_animation.setEndValue(QPoint(self.desktop.width() - 2, self.y()))
-        self.show_animation.setDuration(300)
-        # hide animation
         self.hide_animation = QPropertyAnimation(self, b'pos', self)
         self.hide_animation.setStartValue(QPoint(self.x(), self.y()))
-        self.hide_animation.setEndValue(QPoint(self.desktop.width() - self.width(), self.y()))
+        # 自己实现退出，最小化操作，就设置为0，不然干不掉了
+        self.hide_animation.setEndValue(QPoint(self.desktop.width() - self.limit_width, self.y()))
+        self.hide_animation.setDuration(300)
+        # hide animation
+        self.show_animation = QPropertyAnimation(self, b'pos', self)
+        self.show_animation.setStartValue(QPoint(self.x(), self.y()))
+        self.show_animation.setEndValue(QPoint(self.desktop.width() - self.width(), self.y()))
+        # self.hide_animation.setEndValue(QPoint(0, self.y()))
         # 倒过来的动画有问题
-        self.hide_animation.setDuration(100)
 
     def check_if_done(self):
         for dir_item in self.map_name_item.values():

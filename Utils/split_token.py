@@ -7,14 +7,13 @@ from settings import DELIMITER, TOKEN_SIZE
 
 
 class Split_Token(QThread):
-    def __init__(self, distribute_path, input_path, command, dialong_update_signal, token_size=TOKEN_SIZE, delimiter=DELIMITER, parent=None):
+    def __init__(self, distribute_path, input_path, command, token_size=TOKEN_SIZE, delimiter=DELIMITER, parent=None):
         super(Split_Token, self).__init__(parent=parent)
         self.dp = distribute_path
         self.ip = input_path
         self.tk_size = token_size
         self.delimiter = delimiter
         self.command = command
-        self.dus = dialong_update_signal
 
     def run(self) -> None:
         try:
