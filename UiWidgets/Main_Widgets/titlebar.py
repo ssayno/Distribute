@@ -10,7 +10,7 @@ title_bar_style = '''\
 QLabel{
 font: 24px;
 qproperty-alignment: AlignCenter;
-padding-bottom: 10px;
+padding: 10px 0;
 color: black;
 }
 '''
@@ -34,7 +34,7 @@ class Titlebar(QWidget):
         self.setStyleSheet(title_bar_style)
 
     def add_title_bar_button(self):
-        self.info_label = QLabel("Complex Command")
+        self.info_label = QLabel("复杂命令输入")
         self.minimum_button = TitlebarButton(self)
         self.minimum_button.setIcon(QIcon(os.path.join(self.icon_path, 'icons8-minimize-window-16.png')))
         self.maximum_button = TitlebarButton(self)

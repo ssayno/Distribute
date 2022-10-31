@@ -84,6 +84,7 @@ class Process_dialog(QDialog):
         self.dir_tree.setHeaderLabels(["Dir Or File", "Status"])
         self.dir_tree.header().setDefaultAlignment(Qt.AlignCenter)
         self.dir_tree.header().setSectionResizeMode(QHeaderView.Stretch)
+        self.dir_tree.itemChanged.connect(self.status_column_changed)
         self.q_layout.addWidget(self.dir_tree)
 
     def _setPosition(self):
@@ -121,12 +122,12 @@ class Process_dialog(QDialog):
             if old_status != status:
                 need_modify_item.setText(1, status)
                 if status == "DONE":
-                    need_modify_item.setBackground(0, self.done_bg_color)
-                    need_modify_item.setBackground(1, self.done_bg_color)
+                    # need_modify_item.setBackground(0, self.done_bg_color)
+                    # need_modify_item.setBackground(1, self.done_bg_color)
                     self.success_count += 1
-                elif status == "Running":
-                    need_modify_item.setBackground(0, self.running_bg_color)
-                    need_modify_item.setBackground(1, self.running_bg_color)
+                # elif status == "Running":
+                    # need_modify_item.setBackground(0, self.running_bg_color)
+                    # need_modify_item.setBackground(1, self.running_bg_color)
         else:
             if company_name not in self.map_name_item:
                 header_item = QTreeWidgetItem(self.dir_tree)
@@ -183,7 +184,6 @@ class Process_dialog(QDialog):
                     self.update_tree_signal.emit(origin_name, "DONE", company_name, False)
             elif NAME_DELIMITER in json_file_name:
                 origin_name = f"{json_file_name.split(NAME_DELIMITER)[0]}.json"
-                print(origin_name)
                 if origin_name in self.map_name_item[company_name].get('JSON-FILES', []):
                     self.update_tree_signal.emit(origin_name, "Running", company_name, True)
                 else:
@@ -261,3 +261,14 @@ class Process_dialog(QDialog):
                     break
             else:
                 header_item.setText(1, "DONE")
+
+
+    def status_column_changed(self, item: QTreeWidgetItem, column: int):
+        if column == 1:
+            status_text = item.text(column)
+            if status_text == "Running":
+                item.setBackground(0, self.running_bg_color)
+                item.setBackground(1, self.running_bg_color)
+            elif status_text == "DONE":
+                item.setBackground(0, self.done_bg_color)
+                item.setBackground(1, self.done_bg_color)

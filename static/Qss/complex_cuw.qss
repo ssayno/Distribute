@@ -2,26 +2,27 @@ QWidget{
 font: 20px;
 }
 QLabel{
-font: 30px;
-background-color: grey;
+font: 20px;
+background-color: #2874A6;
 color: black;
 qproperty-alignment: AlignCenter;
 }
 QTextEdit{
-border-radius: 8px;
+border-radius: 20px;
+padding: 20px;
 font-style: oblique;
 font: 22px;
-background-color: #EEDEE8;
-color: red;
+background-color: #ABEBC6;
+color: black;
 }
 QPushButton{
-border: 1px solid black;
+border: 2px solid transparent;
 padding: 10px 0;
 font: 20px;
+background-color: #AEB6BF;
 color: black;
 }
 QPushButton:hover{
-font: 20px;
 font-style: italic;
 color: green;
 }
@@ -32,7 +33,7 @@ color: black;
 opacity: 0.8;
 }
 QLineEdit{
-border-bottom: 5px solid black;
+border: 2px solid #FDEBD0;
 padding: 5px 12px;
 background-color: pink;
 color: black;

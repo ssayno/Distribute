@@ -32,6 +32,7 @@ class Distribute_Command(QMainWindow):
         # set centeral widget
         self.cw = QWidget()
         self.cw_layout = QVBoxLayout()
+        self.cw_layout.setContentsMargins(0, 0, 0, 0)
         self.cw_layout.setSpacing(0)
         self.setCentralWidget(self.cw)
         self.cw.setLayout(self.cw_layout)
@@ -166,9 +167,9 @@ class Distribute_Command(QMainWindow):
     def titlebar_info_show(self):
         current_widget = self._stack.currentWidget()
         if current_widget == self.complex_command_uw:
-            self.title_bar.info_label.setText("Complex Command")
+            self.title_bar.info_label.setText("复杂指令输入")
         elif current_widget == self.single_command_uw:
-            self.title_bar.info_label.setText("Single Command")
+            self.title_bar.info_label.setText("简单指令输入")
 
     def quit_this_app(self):
         self.close()
@@ -201,7 +202,7 @@ class Test(QWidget):
         super(Test, self).__init__()
         tim = QTimer(self)
         # single_ = QTestThread(self, "", "", "")
-        single_ = Split_Token("", "", "", "")
+        single_ = Split_Token("", "", "")
         single_.start()
         tim.timeout.connect(lambda: print(single_.isFinished()))
         tim.start(2000)
@@ -216,8 +217,7 @@ class QTestThread(QThread):
         self.command = command
 
     def run(self):
-        print('a')
-
+        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

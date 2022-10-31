@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon, QImageReader, QPixmap
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTextEdit, QVBoxLayout, QWidget
 from settings import DELIMITER, TOKEN_SIZE, COMMAND, INPUT_PATH, DISTRIBUTE_PATH, STATIC
 qss_style_file = os.path.join(STATIC, 'Qss', 'complex_cuw.qss')
@@ -24,11 +25,11 @@ class ComplexUIWidget(QWidget):
         # comamnd input
         command_layout = QVBoxLayout()
         #command_layout.setSpacing(0)
-        self.command_input_label = QLabel("指令输入")
+        # self.command_input_label = QLabel("指令输入")
         self.command_input_list = QTextEdit()
         if COMMAND is not None:
             self.command_input_list.append(COMMAND)
-        command_layout.addWidget(self.command_input_label)
+        # command_layout.addWidget(self.command_input_label)
         command_layout.addWidget(self.command_input_list)
         arguments_layout.addLayout(command_layout, stretch=5)
         # delimiter select
@@ -77,7 +78,7 @@ class ComplexUIWidget(QWidget):
         # start button
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(0)
+        button_layout.setSpacing(2)
         self.show_dialog_button = QPushButton("Show")
         self.start_button = QPushButton("Start Distributed")
         self.hide_dialog_button = QPushButton("Hide")

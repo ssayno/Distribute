@@ -25,11 +25,11 @@ class SingleUIWidget(QWidget):
         # comamnd input
         command_layout = QVBoxLayout()
         #command_layout.setSpacing(0)
-        self.command_input_label = QLabel("指令输入")
+        # self.command_input_label = QLabel("指令输入")
         self.command_input_list = QTextEdit()
         if COMMAND is not None:
             self.command_input_list.append(COMMAND)
-        command_layout.addWidget(self.command_input_label)
+        # command_layout.addWidget(self.command_input_label)
         command_layout.addWidget(self.command_input_list)
         arguments_layout.addLayout(command_layout, stretch=5)
         #
